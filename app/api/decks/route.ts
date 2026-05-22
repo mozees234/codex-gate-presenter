@@ -53,8 +53,19 @@ export async function POST(req: NextRequest) {
     updatedAt: now,
   };
 
-  const stored = await saveDeck(meta, html);
-  return NextResponse.json({ success: true, data: stored }, { status: 201 });
+  try {
+    const stored = await saveDeck(meta, html);
+    return NextResponse.json({ success: true, data: stored }, { status: 201 });
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : 'Unknown storage error.';
+    const hint = !process.env.BLOB_READ_WRITE_TOKEN
+      ? ' Storage is not configured — connect a Vercel Blob store to this project (Storage → Blob → Connect), then redeploy.'
+      : '';
+    return NextResponse.json(
+      { success: false, error: `Could not save deck.${hint}`, detail },
+      { status: 500 }
+    );
+  }
 }
 
 async function uniqueSlug(base: string): Promise<string> {

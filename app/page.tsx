@@ -36,7 +36,10 @@ export default function LibraryPage() {
         const form = new FormData();
         form.append('file', file);
         const res = await fetch('/api/decks', { method: 'POST', body: form });
-        const json = await res.json();
+        const json = await res.json().catch(() => null);
+        if (!json) {
+          throw new Error(`Server error (${res.status}). The deck could not be saved.`);
+        }
         if (!json.success) throw new Error(json.error || 'Upload failed.');
         await load();
       } catch (e) {
