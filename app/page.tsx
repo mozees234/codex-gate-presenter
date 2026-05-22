@@ -40,7 +40,9 @@ export default function LibraryPage() {
         if (!json) {
           throw new Error(`Server error (${res.status}). The deck could not be saved.`);
         }
-        if (!json.success) throw new Error(json.error || 'Upload failed.');
+        if (!json.success) {
+          throw new Error([json.error, json.detail].filter(Boolean).join(' — ') || 'Upload failed.');
+        }
         await load();
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Upload failed.');
